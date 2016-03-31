@@ -39,6 +39,9 @@ typedef void (^AMPPreviewControllerFinishDownload)(NSError *error);
 @required
 - (NSURL *)remoteUrl;
 @property (readwrite, nonatomic) NSURL * previewItemURL;
+
+- (NSURLRequest *)urlRequest;
+
 @end
 
 @interface AMPPreviewController : QLPreviewController
@@ -81,6 +84,15 @@ typedef void (^AMPPreviewControllerFinishDownload)(NSError *error);
  *  @param title The default title for the remote document
  */
 - (id)initWithRemoteFile:(NSURL *)remoteUrl title:(NSString *)title;
+
+/**
+ *  Use a URL Request.
+ *  This will download and preview the remote document.
+ *
+ *  @param urlRequest The URL Request for the remote document
+ *  @param title The default title for the remote document
+ */
+- (id)initWithURLRequest:(NSURLRequest *)urlRequest title:(NSString *)title;
 
 /**
  *  Executed when the download of the file starts.

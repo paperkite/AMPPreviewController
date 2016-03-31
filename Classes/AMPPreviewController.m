@@ -28,10 +28,17 @@
 @property (nonatomic, strong) NSURL *remoteUrl;
 @property (nonatomic, strong, readwrite) NSURL *previewItemURL;
 @property (nonatomic, strong, readwrite) NSString *previewItemTitle;
+@property (nonatomic, strong, readwrite) NSURLRequest *previewItemURLRequest;
 @end
 
 @implementation AMPPreviewObject
-@synthesize remoteUrl, previewItemURL, previewItemTitle;
+
+@synthesize remoteUrl, previewItemURL, previewItemTitle, previewItemURLRequest;
+
+- (NSURLRequest *)urlRequest
+{
+    return self.previewItemURLRequest;
+}
 
 @end
 
@@ -79,6 +86,18 @@
     return self;
 }
 
+- (id)initWithURLRequest:(NSURLRequest *)urlRequest title:(NSString *)title {
+    self = [self init];
+    if (self) {
+        AMPPreviewObject *item = [AMPPreviewObject new];
+        item.previewItemTitle = title;
+        item.previewItemURLRequest = urlRequest;
+        item.remoteUrl = urlRequest.URL;
+        _previewItem = item;
+    }
+    return self;
+}
+
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     
@@ -118,11 +137,15 @@
     NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
     AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:configuration];
     
-    NSURL *URL = [(id <AMPPreviewItem>)self.previewItem remoteUrl];
-    NSURLRequest *request = [NSURLRequest requestWithURL:URL];
+    NSURLRequest *request = [(id <AMPPreviewItem>)self.previewItem urlRequest];
+    if( request == nil) {
+        
+        NSURL *URL = [(id <AMPPreviewItem>)self.previewItem remoteUrl];
+        request = [NSURLRequest requestWithURL:URL];
+    }
     
     NSURLSessionDownloadTask *downloadTask = [manager downloadTaskWithRequest:request progress:nil destination:^NSURL *(NSURL *targetPath, NSURLResponse *response) {
-        return [self destinationPathForURL:URL];
+        return [self destinationPathForURL:request.URL];
     } completionHandler:^(NSURLResponse *response, NSURL *filePath, NSError *error) {
         if (!error) {
 //            NSLog(@"File downloaded to: %@", filePath);
