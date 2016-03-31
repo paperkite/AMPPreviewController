@@ -167,7 +167,7 @@
         if (!error) {
 //            NSLog(@"File downloaded to: %@", filePath);
             
-            if ([self.previewItem isKindOfClass:[AMPPreviewObject class]]) {
+            if ([self.previewItem isKindOfClass:[AMPPreviewObject class]] && ((AMPPreviewObject *)self.previewItem.previewItemTitle == nil)) {
                 [(AMPPreviewObject *)self.previewItem setPreviewItemTitle:[response suggestedFilename]];
             }
             [(id <AMPPreviewItem>)self.previewItem setPreviewItemURL:filePath];
