@@ -41,6 +41,7 @@ typedef void (^AMPPreviewControllerFinishDownload)(NSError *error);
 @property (readwrite, nonatomic) NSURL * previewItemURL;
 
 - (NSURLRequest *)urlRequest;
+- (NSURL *)previewItemFilename;
 
 @end
 
@@ -90,9 +91,10 @@ typedef void (^AMPPreviewControllerFinishDownload)(NSError *error);
  *  This will download and preview the remote document.
  *
  *  @param urlRequest The URL Request for the remote document
+ *  @param localFilename The filename to be used to save the file on the device (can be nil)
  *  @param title The default title for the remote document
  */
-- (id)initWithURLRequest:(NSURLRequest *)urlRequest title:(NSString *)title;
+- (id)initWithURLRequest:(NSURLRequest *)urlRequest localFilename:(NSString *)filename andTitle:(NSString *)title;
 
 /**
  *  Executed when the download of the file starts.

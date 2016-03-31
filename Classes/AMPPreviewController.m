@@ -25,15 +25,19 @@
 #pragma mark - AMPPreviewItem
 
 @interface AMPPreviewObject : NSObject <AMPPreviewItem>
+
 @property (nonatomic, strong) NSURL *remoteUrl;
 @property (nonatomic, strong, readwrite) NSURL *previewItemURL;
 @property (nonatomic, strong, readwrite) NSString *previewItemTitle;
+
 @property (nonatomic, strong, readwrite) NSURLRequest *previewItemURLRequest;
+@property (nonatomic, strong, readwrite) NSURLRequest *previewItemFilename;
+
 @end
 
 @implementation AMPPreviewObject
 
-@synthesize remoteUrl, previewItemURL, previewItemTitle, previewItemURLRequest;
+@synthesize remoteUrl, previewItemURL, previewItemTitle, previewItemURLRequest, previewItemFilename;
 
 - (NSURLRequest *)urlRequest
 {
@@ -86,13 +90,14 @@
     return self;
 }
 
-- (id)initWithURLRequest:(NSURLRequest *)urlRequest title:(NSString *)title {
+- (id)initWithURLRequest:(NSURLRequest *)urlRequest localFilename: (NSString *)filename andTitle:(NSString *)title {
     self = [self init];
     if (self) {
         AMPPreviewObject *item = [AMPPreviewObject new];
         item.previewItemTitle = title;
         item.previewItemURLRequest = urlRequest;
         item.remoteUrl = urlRequest.URL;
+        item.previewItemFilename = filename;
         _previewItem = item;
     }
     return self;
@@ -127,6 +132,12 @@
     return path;
 }
 
+- (NSURL *)destinationPathWithFilename:(NSString *)filename {
+    NSURL *documentsDirectoryPath = [NSURL fileURLWithPath:[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject]];
+    NSURL *path = [documentsDirectoryPath URLByAppendingPathComponent:filename];
+    return path;
+}
+
 #pragma mark -
 
 - (void)downloadFile {
@@ -138,14 +149,20 @@
     AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:configuration];
     
     NSURLRequest *request = [(id <AMPPreviewItem>)self.previewItem urlRequest];
+    NSURL *fileURL;
     if( request == nil) {
         
         NSURL *URL = [(id <AMPPreviewItem>)self.previewItem remoteUrl];
         request = [NSURLRequest requestWithURL:URL];
+        fileURL = [self destinationPathForURL:request.URL];
+    } else {
+        NSString *filename = [(id <AMPPreviewItem>)self.previewItem previewItemFilename];
+        if(filename != nil) fileURL = [self destinationPathWithFilename:filename];
+        else fileURL = [self destinationPathForURL:request.URL];
     }
     
     NSURLSessionDownloadTask *downloadTask = [manager downloadTaskWithRequest:request progress:nil destination:^NSURL *(NSURL *targetPath, NSURLResponse *response) {
-        return [self destinationPathForURL:request.URL];
+        return fileURL;
     } completionHandler:^(NSURLResponse *response, NSURL *filePath, NSError *error) {
         if (!error) {
 //            NSLog(@"File downloaded to: %@", filePath);
